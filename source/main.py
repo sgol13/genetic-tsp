@@ -4,6 +4,7 @@
 import argparse
 import random
 from genetic_tsp import GeneticTSP
+from visualizer import draw_path
 
 
 def create_arguments_parser():
@@ -108,9 +109,16 @@ def generate_random_3d_points(points_num):
 
 
 def read_points_from_file(filename):
+
     with open(filename, "r") as file:
         lines = file.readlines()
         points = [[float(x) for x in line.split()] for line in lines]
+
+        dimension = len(points[0])
+        for point in points:
+            if len(point) != dimension:
+                raise Exception('Incorrect points\' dimensions.')
+
         return points
 
 
@@ -135,12 +143,18 @@ def set_custom_solver_parameters(solver, args):
         solver.set_parameters(mutation_probability=args.mutation_probability)
 
 
+def solution_to_string(solution):
+    return '\n'.join([' '.join([str(x) for x in point]) for point in points])
+
+
 if __name__ == '__main__':
 
+    # parse command line arguments
     parser = create_arguments_parser()
     args = parser.parse_args()
     check_arguments(args)
 
+    # prepare a set of points
     if args.random2:
         points = generate_random_2d_points(args.random2)
     elif args.random3:
@@ -148,38 +162,24 @@ if __name__ == '__main__':
     else:
         points = read_points_from_file(args.input_filename)
 
+    # run the genetic algorithm
     solver = GeneticTSP(path=args.config)
     set_custom_solver_parameters(solver, args)
+    solution, distance = solver.solve(points)
 
-    solution = solver.solve(points)
-    print(solution)
+    path = [points[i] for i in solution]
+    string_solution = solution_to_string(path)
 
-    print(points)
+    if args.output_filename:
+        with open(args.output_filename, 'w') as file:
+            file.write(string_solution)
+    else:
+        print(string_solution)
 
-# def generate_random_cities():
-#     return [(randint(0, MAX_X), randint(0, MAX_Y)) for _ in range(N_CITIES)]
+    if args.visual:
+        dimension = len(points[0])
+        if dimension not in [2, 3]:
+            raise Exception(
+                'You can visualize only 2/3-dimensional sets of points.')
 
-
-# def draw_path(cities, path):
-#     plt.scatter(*zip(*cities))
-#     for i in range(N_CITIES):
-#         plt.annotate(i, cities[path[i]])
-
-#     def draw_line(p1, p2):
-#         xs = [cities[p1][0], cities[p2][0]]
-#         ys = [cities[p1][1], cities[p2][1]]
-#         lines = plt.plot(xs, ys)
-#         plt.setp(lines, color='b', linewidth=1.5)
-
-#     for i in range(N_CITIES-1):
-#         draw_line(path[i], path[i+1])
-#     draw_line(path[-1], path[0])
-
-#     plt.show()
-
-
-# cities = generate_random_cities()
-# distances = calculate_distance_matrix(cities)
-# solution = genetic_algorithm(cities, distances)
-
-# draw_path(cities, solution)
+        draw_path(points, solution)

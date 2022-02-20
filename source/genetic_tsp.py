@@ -68,7 +68,10 @@ class GeneticTSP:
 
             population = population + children
 
-        return self.__choose_best_solutions(distances, population, 1)[0]
+        solution = self.__choose_best_solutions(distances, population, 1)[0]
+        dis = self.__calculate_path_length(solution, distances)
+
+        return solution, dis
 
     def __calculate_distance_matrix(self, points):
 
