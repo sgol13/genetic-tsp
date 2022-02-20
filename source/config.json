@@ -1,0 +1,8 @@
+{
+    "population_size": 20,
+    "generations_num": 30,
+    "initial_selection": 10,
+    "children_selection": 8,
+    "parents_selection": 8,
+    "mutation_probability": 0.4
+}
