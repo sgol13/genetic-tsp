@@ -182,4 +182,4 @@ if __name__ == '__main__':
             raise Exception(
                 'You can visualize only 2/3-dimensional sets of points.')
 
-        draw_path(points, solution)
+        draw_path(solution, path)
