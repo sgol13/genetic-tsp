@@ -1,146 +1,185 @@
 # Genetic TSP
 # Szymon Golebiowski
 
-from random import randint, shuffle, seed, random
-import matplotlib.pyplot as plt
-
-# class GeneticTSP:
-
-
-N_CITIES = 12
-MAX_X = 100
-MAX_Y = 100
-
-POPULATION_SIZE = 30
-N_GENERATIONS = 30
-INITIAL_SELECTION = 10
-CHILDREN_SELECTION = 8
-PARENTS_SELECTION = 8
-MUTATION_PROBABILITY = 0.5
+import argparse
+import random
+from genetic_tsp import GeneticTSP
 
 
-def generate_random_cities():
-    return [(randint(0, MAX_X), randint(0, MAX_Y)) for _ in range(N_CITIES)]
+def create_arguments_parser():
+
+    parser = argparse.ArgumentParser(
+        description='Multi-dimensional Traveling Salesman Problem using genetic algorithm.'
+    )
+
+    parser.add_argument(
+        '-r2', '--random2',
+        type=int, action='store', default=0, metavar='N',
+        help='Generates a random set of N 2D points and uses it as input data.'
+    )
+
+    parser.add_argument(
+        '-r3', '--random3',
+        type=int, action='store', default=0, metavar='N',
+        help='Generates a random set of N 3D points and uses it as input data.'
+    )
+
+    parser.add_argument(
+        '-v', '--visual',
+        action='store_true',
+        help='Displays a solution visualization. Works only if the given points are 2 or 3-dimensional.'
+    )
+
+    parser.add_argument(
+        '--config',
+        action='store', default='config.json', metavar='FILE',
+        help='Reads custom algorithm configuration from a given json FILE.'
+    )
+
+    parser.add_argument(
+        'input_filename',
+        action='store', metavar='IN', nargs='?', default=None,
+        help='Path to a file containing a set of points.'
+    )
+
+    parser.add_argument(
+        'output_filename',
+        action='store', metavar='OUT', nargs='?', default=None,
+        help='Path to a file to which the result should be written. '
+        'If not specified, the result is printed to stdout.'
+    )
+
+    parser.add_argument(
+        '--population_size',
+        type=int, action='store', metavar='N', default=None,
+        help='Number of individuals in a single generation. Note that it directly affects only the first generation. '
+    )
+
+    parser.add_argument(
+        '--generations_num',
+        type=int, action='store', metavar='N', default=None,
+        help='Number of generations processed by the algorithm.'
+    )
+
+    parser.add_argument(
+        '--initial_selection',
+        type=int, action='store', metavar='N', default=None,
+        help='Number of selected best solutions during the first phase of the algorithm.'
+    )
+
+    parser.add_argument(
+        '--children_selection',
+        type=int, action='store', metavar='N', default=None,
+        help='Number of selected best children during the second phase of the algorithm.'
+    )
+
+    parser.add_argument(
+        '--parents_selection',
+        type=int, action='store', metavar='N', default=None,
+        help='Number of selected best parents during the second phase of the algorithm.'
+    )
+
+    parser.add_argument(
+        '--mutation_probability',
+        type=float, action='store', metavar='N', default=None,
+        help='Probability of mutation for a single children.'
+    )
+
+    return parser
 
 
-def calculate_distance_matrix(cities):
-    distances = [[0]*N_CITIES for _ in range(N_CITIES)]
-    for i in range(N_CITIES):
-        for j in range(N_CITIES):
-            dx = cities[i][0] - cities[j][0]
-            dy = cities[i][1] - cities[j][1]
-            dis = (dx**2 + dy**2) ** (0.5)
-            distances[i][j] = dis
-            distances[j][i] = dis
-    return distances
+def check_arguments(args):
+
+    if args.random2 or args.random3:
+        args.output_filename = args.input_filename
+        args.input_filename = None
+
+    elif not args.input_filename:
+        raise Exception('No input data provided.')
 
 
-def calculate_path_length(path, distances):
-    length = distances[path[-1]][path[0]]
-    for i in range(0, N_CITIES-1):
-        length += distances[path[i]][path[i+1]]
-    return length
+def generate_random_2d_points(points_num):
+    return [[random.randint(0, 100), random.randint(0, 100)] for _ in range(points_num)]
 
 
-def draw_path(cities, path):
-    plt.scatter(*zip(*cities))
-    for i in range(N_CITIES):
-        plt.annotate(i, cities[path[i]])
-
-    def draw_line(p1, p2):
-        xs = [cities[p1][0], cities[p2][0]]
-        ys = [cities[p1][1], cities[p2][1]]
-        lines = plt.plot(xs, ys)
-        plt.setp(lines, color='b', linewidth=1.5)
-
-    for i in range(N_CITIES-1):
-        draw_line(path[i], path[i+1])
-    draw_line(path[-1], path[0])
-
-    plt.show()
+def generate_random_3d_points(points_num):
+    return [[random.randint(0, 100), random.randint(0, 100), random.randint(0, 100)]
+            for _ in range(points_num)]
 
 
-def generate_initial_population():
-    population = [[i for i in range(N_CITIES)] for _ in range(POPULATION_SIZE)]
-    for path in population:
-        shuffle(path)
-
-    return population
-
-
-def choose_best_solutions(distances, solutions, choose_num):
-    solutions = [(calculate_path_length(path, distances), path)
-                 for path in solutions]
-    solutions.sort()
-    _, solutions = zip(*solutions[:choose_num])
-    return list(solutions)
+def read_points_from_file(filename):
+    with open(filename, "r") as file:
+        lines = file.readlines()
+        points = [[float(x) for x in line.split()] for line in lines]
+        return points
 
 
-def crossover(population):
+def set_custom_solver_parameters(solver, args):
 
-    def crossover_pair(path1, path2):
+    if args.population_size:
+        solver.set_parameters(population_size=args.population_size)
 
-        divide = randint(1, N_CITIES-1)
+    if args.generations_num:
+        solver.set_parameters(generations_num=args.generations_num)
 
-        child = path1[:divide]
+    if args.initial_selection:
+        solver.set_parameters(initial_selection=args.initial_selection)
 
-        for city in path2:
-            if city not in child:
-                child.append(city)
-        return child
+    if args.children_selection:
+        solver.set_parameters(children_selection=args.children_selection)
 
-    shuffle(population)
-    children = []
-    for i in range(0, len(population)-1, 1):
-        children.append(crossover_pair(population[i], population[i+1]))
+    if args.parents_selection:
+        solver.set_parameters(parents_selection=args.parents_selection)
 
-    children.append(crossover_pair(population[0], population[-1]))
-
-    return children
+    if args.mutation_probability:
+        solver.set_parameters(mutation_probability=args.mutation_probability)
 
 
-def mutation(population):
+if __name__ == '__main__':
 
-    indices = [i for i in range(N_CITIES)]
+    parser = create_arguments_parser()
+    args = parser.parse_args()
+    check_arguments(args)
 
-    def mutation_single(path):
+    if args.random2:
+        points = generate_random_2d_points(args.random2)
+    elif args.random3:
+        points = generate_random_3d_points(args.random3)
+    else:
+        points = read_points_from_file(args.input_filename)
 
-        nonlocal indices
-        shuffle(indices)
+    solver = GeneticTSP(path=args.config)
+    set_custom_solver_parameters(solver, args)
 
-        i1, i2 = indices[0], indices[1]
+    solution = solver.solve(points)
+    print(solution)
 
-        path[i1], path[i2] = path[i2], path[i1]
+    print(points)
 
-    for path in population:
-        if random() < MUTATION_PROBABILITY:
-            mutation_single(path)
-
-
-def genetic_algorithm(cities, distances):
-    population = generate_initial_population()
-
-    for generation_num in range(N_GENERATIONS):
-
-        population = choose_best_solutions(
-            distances, population, INITIAL_SELECTION)
-
-        children = crossover(population)
-        mutation(children)
-
-        children = choose_best_solutions(
-            distances, children, CHILDREN_SELECTION)
-
-        population = choose_best_solutions(
-            distances, population, PARENTS_SELECTION)
-
-        population = population + children
-
-    return choose_best_solutions(distances, population, 1)[0]
+# def generate_random_cities():
+#     return [(randint(0, MAX_X), randint(0, MAX_Y)) for _ in range(N_CITIES)]
 
 
-cities = generate_random_cities()
-distances = calculate_distance_matrix(cities)
-solution = genetic_algorithm(cities, distances)
+# def draw_path(cities, path):
+#     plt.scatter(*zip(*cities))
+#     for i in range(N_CITIES):
+#         plt.annotate(i, cities[path[i]])
 
-draw_path(cities, solution)
+#     def draw_line(p1, p2):
+#         xs = [cities[p1][0], cities[p2][0]]
+#         ys = [cities[p1][1], cities[p2][1]]
+#         lines = plt.plot(xs, ys)
+#         plt.setp(lines, color='b', linewidth=1.5)
+
+#     for i in range(N_CITIES-1):
+#         draw_line(path[i], path[i+1])
+#     draw_line(path[-1], path[0])
+
+#     plt.show()
+
+
+# cities = generate_random_cities()
+# distances = calculate_distance_matrix(cities)
+# solution = genetic_algorithm(cities, distances)
+
+# draw_path(cities, solution)

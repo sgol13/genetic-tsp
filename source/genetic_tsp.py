@@ -1,8 +1,7 @@
 # Genetic TSP
 # Szymon Golebiowski
 
-import matplotlib.pyplot as plt
-from random import randint, shuffle, seed, random
+import random
 import json
 
 
@@ -99,13 +98,14 @@ class GeneticTSP:
 
     def __generate_initial_population(self, points_num):
 
-        POPULATION_SIZE = self.__config['population_size']
+        CHILDREN_SELECTION = self.__config['children_selection']
+        PARENTS_SELECTION = self.__config['parents_selection']
 
         population = [[i for i in range(points_num)]
-                      for _ in range(POPULATION_SIZE)]
+                      for _ in range(CHILDREN_SELECTION + PARENTS_SELECTION)]
 
         for path in population:
-            shuffle(path)
+            random.shuffle(path)
 
         return population
 
@@ -121,7 +121,7 @@ class GeneticTSP:
 
         def crossover_pair(path1, path2):
 
-            divide = randint(1, len(path1)-1)
+            divide = random.randint(1, len(path1)-1)
 
             child = path1[:divide]
 
@@ -130,7 +130,7 @@ class GeneticTSP:
                     child.append(city)
             return child
 
-        shuffle(population)
+        random.shuffle(population)
         children = []
         for i in range(0, len(population)-1, 1):
             children.append(crossover_pair(population[i], population[i+1]))
@@ -147,47 +147,12 @@ class GeneticTSP:
         def mutation_single(path):
 
             nonlocal indices
-            shuffle(indices)
+            random.shuffle(indices)
 
             i1, i2 = indices[0], indices[1]
 
             path[i1], path[i2] = path[i2], path[i1]
 
         for path in population:
-            if random() < MUTATION_PROBABILITY:
+            if random.random() < MUTATION_PROBABILITY:
                 mutation_single(path)
-
-
-N_CITIES = 10
-MAX_X = 100
-MAX_Y = 100
-
-
-def generate_random_cities():
-    return [(randint(0, MAX_X), randint(0, MAX_Y)) for _ in range(N_CITIES)]
-
-
-def draw_path(cities, path):
-    plt.scatter(*zip(*cities))
-    for i in range(N_CITIES):
-        plt.annotate(i, cities[path[i]])
-
-    def draw_line(p1, p2):
-        xs = [cities[p1][0], cities[p2][0]]
-        ys = [cities[p1][1], cities[p2][1]]
-        lines = plt.plot(xs, ys)
-        plt.setp(lines, color='b', linewidth=1.5)
-
-    for i in range(N_CITIES-1):
-        draw_line(path[i], path[i+1])
-    draw_line(path[-1], path[0])
-
-    plt.show()
-
-
-solver = GeneticTSP(path='config.json')
-cities = generate_random_cities()
-path = solver.solve(cities)
-print(path)
-
-# draw_path(cities, solution)
