@@ -3,8 +3,8 @@
 
 import argparse
 import random
-from genetic_tsp import GeneticTSP
-from visualizer import draw_path
+from genetictsp.algorithm import GeneticTSP
+from genetictsp.visualizer import draw_path
 
 
 def create_arguments_parser():
@@ -143,11 +143,13 @@ def set_custom_solver_parameters(solver, args):
         solver.set_parameters(mutation_probability=args.mutation_probability)
 
 
-def solution_to_string(solution):
-    return '\n'.join([' '.join([str(x) for x in point]) for point in points])
+def solution_to_string(path, distance):
+    string = "{:.3f}".format(round(distance, 3)) + '\n'
+    string += '\n'.join([' '.join([str(x) for x in point]) for point in path])
+    return string
 
 
-if __name__ == '__main__':
+def main():
 
     # parse command line arguments
     parser = create_arguments_parser()
@@ -168,18 +170,25 @@ if __name__ == '__main__':
     solution, distance = solver.solve(points)
 
     path = [points[i] for i in solution]
-    string_solution = solution_to_string(path)
+    string_solution = solution_to_string(path, distance)
 
+    # save or print the result
     if args.output_filename:
         with open(args.output_filename, 'w') as file:
             file.write(string_solution)
     else:
         print(string_solution)
 
+    # display visualization
     if args.visual:
+
         dimension = len(points[0])
         if dimension not in [2, 3]:
             raise Exception(
                 'You can visualize only 2/3-dimensional sets of points.')
 
         draw_path(solution, path)
+
+
+if __name__ == '__main__':
+    main()
