@@ -11,5 +11,5 @@ setup(
     description='Multi-dimensional Traveling Salesman Problem using genetic algorithm',
     install_requires=['matplotlib>=3.3.4'],
     entry_points={'console_scripts': [
-        'genetictsp = genetictsp.main:main', ], }
+        'genetictsp = genetictsp.main:main'], }
 )
