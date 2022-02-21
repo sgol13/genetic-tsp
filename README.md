@@ -1,5 +1,7 @@
-# Genetic Algortihm for TSP
-This project is an application of a [genetic algorithm](https://en.wikipedia.org/wiki/Genetic_algorithm) for the [Travelling Salesman Problem](https://en.wikipedia.org/wiki/Travelling_salesman_problem). I've written it to experiment with this peculiar nature-inspired approach to optimization problems. You can use it to solve TSP problem for any n-dimensional set of points. Furthermore, solutions for 2 and 3-dimensional datasets can be visualized. The package can be utilized both as a command line tool and as a library imported into some other Python code.
+# Genetic Algorithm for TSP
+This project is an application of a [genetic algorithm](https://en.wikipedia.org/wiki/Genetic_algorithm) for the [Travelling Salesman Problem](https://en.wikipedia.org/wiki/Travelling_salesman_problem). I've written it to experiment with this unconventional nature-inspired approach to optimization problems. You can use it to solve TSP problem for any n-dimensional set of points. Furthermore, solutions for 2 and 3-dimensional datasets can be visualized. The package can be utilized both as a command line tool and as a module imported into some other Python code.
+
+<img src="example.png" width="800">
 
 
 ## Installation
@@ -10,8 +12,7 @@ cd genetic-tsp
 python3 setup.py install --user
 ```
 
-## Usage
-#### Command line
+## Command Line
 As mentioned previously, you can use the package as a command line tool. The program will read a set of points from a given file, perform the calculations and visualize the obtained solution.
 ```
 genetictsp -v --config custom_cfg.json in.txt out.txt
@@ -58,8 +59,25 @@ optional arguments:
   --mutation_probability N
                         Probability of mutation for a single children.
 ```
-#### Import
-If you want to use the package as a 
+## Import
+If you want to use the package as a module imported to your project, follow the example.
+```
+from genetictsp.algorithm import GeneticTSP
+from genetictsp.visualizer import draw_path
+
+points = [
+    [3, 1, 6], [1, 2, 5],
+    [1, 5, 9], [-4, -2, -6], [-7, -1, -4], [-1, -3, -3],
+]
+
+tsp_solver = GeneticTSP()
+tsp_solver.set_parameters(generations_num=2000)
+solution, distance = tsp_solver.solve(points)
+
+draw_path(solution, points)
+print(distance)
+print(solution)
+```
 
 ## License
 This project is under MIT [license](LICENSE).
