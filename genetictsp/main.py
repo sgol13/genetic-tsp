@@ -3,6 +3,7 @@
 
 import argparse
 import random
+import os
 from genetictsp.algorithm import GeneticTSP
 from genetictsp.visualizer import draw_path
 
@@ -33,7 +34,7 @@ def create_arguments_parser():
 
     parser.add_argument(
         '--config',
-        action='store', default='config.json', metavar='FILE',
+        action='store', default=None, metavar='FILE',
         help='Reads custom algorithm configuration from a given json FILE.'
     )
 
@@ -97,6 +98,10 @@ def check_arguments(args):
 
     elif not args.input_filename:
         raise Exception('No input data provided.')
+
+    if args.config is None:
+        real_path = os.path.dirname(os.path.realpath(__file__))
+        args.config = real_path + '/config.json'
 
 
 def generate_random_2d_points(points_num):
