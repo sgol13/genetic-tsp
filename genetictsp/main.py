@@ -11,7 +11,7 @@ from genetictsp.visualizer import draw_path
 def create_arguments_parser():
 
     parser = argparse.ArgumentParser(
-        description='Multi-dimensional Traveling Salesman Problem using genetic algorithm.'
+        description='Multi-dimensional Travelling Salesman Problem using genetic algorithm.'
     )
 
     parser.add_argument(
