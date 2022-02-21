@@ -1,8 +1,8 @@
 {
-    "population_size": 20,
-    "generations_num": 30,
-    "initial_selection": 10,
-    "children_selection": 10,
-    "parents_selection": 10,
-    "mutation_probability": 0.4
+    "population_size": 300,
+    "generations_num": 300,
+    "initial_selection": 250,
+    "children_selection": 150,
+    "parents_selection": 150,
+    "mutation_probability": 0.5
 }

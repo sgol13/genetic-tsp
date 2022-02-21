@@ -126,17 +126,25 @@ class GeneticTSP:
 
             divide = random.randint(1, len(path1)-1)
 
-            child = path1[:divide]
+            child1 = path1[:divide]
+            child2 = path2[:divide]
 
-            for city in path2:
-                if city not in child:
-                    child.append(city)
-            return child
+            for point in path2:
+                if point not in child1:
+                    child1.append(point)
+
+            for point in path1:
+                if point not in child2:
+                    child2.append(point)
+
+            return child1, child2
 
         random.shuffle(population)
         children = []
         for i in range(0, len(population)-1, 1):
-            children.append(crossover_pair(population[i], population[i+1]))
+            child1, child2 = crossover_pair(population[i], population[i+1])
+            children.append(child1)
+            children.append(child2)
 
         children.append(crossover_pair(population[0], population[-1]))
 

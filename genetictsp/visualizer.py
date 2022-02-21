@@ -4,7 +4,9 @@
 import matplotlib.pyplot as plt
 
 
-def draw_path(solution, path):
+def draw_path(solution, points):
+
+    path = [points[i] for i in solution]
 
     points_num = len(solution)
     dimension = len(path[0])
@@ -15,9 +17,6 @@ def draw_path(solution, path):
     if dimension == 2:
 
         plt.scatter(*zip(*path))
-
-        for i in range(points_num):
-            plt.annotate(i, path[i])
 
         for p1, p2 in lines:
             xs = p1[0], p2[0]
