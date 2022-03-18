@@ -1,5 +1,5 @@
 # Genetic Algorithm for TSP
-This project is an application of a [genetic algorithm](https://en.wikipedia.org/wiki/Genetic_algorithm) for the [Travelling Salesman Problem](https://en.wikipedia.org/wiki/Travelling_salesman_problem). I've written it to experiment with this unconventional nature-inspired approach to optimization problems. You can use it to solve TSP problem for any n-dimensional set of points. Furthermore, solutions for 2 and 3-dimensional datasets can be visualized. The package can be utilized both as a command line tool and as a module imported into some other Python code.
+This project is an application of a [genetic algorithm](https://en.wikipedia.org/wiki/Genetic_algorithm) for the [Travelling Salesman Problem](https://en.wikipedia.org/wiki/Travelling_salesman_problem). I wrote it to experiment with this unconventional nature-inspired approach to optimization problems. You can use it in order to solve TSP problem for any n-dimensional set of points. Furthermore, solutions for 2 and 3-dimensional datasets can be visualized. The package can be utilized both as a command line tool and as a module imported into some other Python code.
 
 <img src="example.png" width="800">
 
